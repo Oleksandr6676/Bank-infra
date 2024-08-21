@@ -1,2 +1,2 @@
 # Bank-infra
-Training project for Slomo
+Training project
