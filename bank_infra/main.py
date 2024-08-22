@@ -7,6 +7,7 @@ app = Flask(__name__)
 
 models.Base.metadata.create_all(bind=engine)
 
+
 @app.route("/accounts/", methods=["GET"])
 def list_accounts():
     """
@@ -24,7 +25,12 @@ def list_accounts():
     """
     db = next(get_db())
     accounts = operations.get_all_accounts(db=db)
-    return jsonify([schemas.AccountResponse.model_validate(account).model_dump() for account in accounts])
+    return jsonify(
+        [
+            schemas.AccountResponse.model_validate(account).model_dump()
+            for account in accounts
+        ]
+    )
 
 
 @app.route("/accounts/transfer/", methods=["POST"])
@@ -51,9 +57,17 @@ def transfer_money():
     db = next(get_db())
     transfer_data = request.json
     transfer_schema = schemas.TransferRequest(**transfer_data)
-    result = operations.transfer(db=db, from_account_id=transfer_schema.from_account_id, to_account_id=transfer_schema.to_account_id, amount=transfer_schema.amount)
+    result = operations.transfer(
+        db=db,
+        from_account_id=transfer_schema.from_account_id,
+        to_account_id=transfer_schema.to_account_id,
+        amount=transfer_schema.amount,
+    )
     if not result:
-        abort(404, description="Transfer failed: account(s) not found or insufficient balance")
+        abort(
+            404,
+            description="Transfer failed: account(s) not found or insufficient balance",
+        )
     return jsonify(schemas.TransferResponse.model_validate(result).model_dump())
 
 
@@ -80,7 +94,7 @@ def delete_account(account_id):
     account_deleted = operations.delete_account(db=db, account_id=account_id)
     if not account_deleted:
         abort(404, description="Account not found")
-    return '', 204
+    return "", 204
 
 
 @app.route("/accounts/", methods=["POST"])
@@ -108,6 +122,7 @@ def create_account():
     account = operations.create_account(db=db, account=account_schema)
     return jsonify(schemas.AccountResponse.model_validate(account).model_dump())
 
+
 @app.route("/accounts/<int:account_id>", methods=["GET"])
 def read_account(account_id):
     """
@@ -134,6 +149,7 @@ def read_account(account_id):
     if not db_account:
         abort(404, description="Account not found")
     return jsonify(schemas.AccountResponse.model_validate(db_account).model_dump())
+
 
 @app.route("/accounts/<int:account_id>/deposit/", methods=["POST"])
 def deposit_money(account_id):
@@ -164,10 +180,13 @@ def deposit_money(account_id):
     db = next(get_db())
     transaction_data = request.json
     transaction_schema = schemas.Transaction(**transaction_data)
-    account = operations.deposit(db, account_id=account_id, amount=transaction_schema.amount)
+    account = operations.deposit(
+        db, account_id=account_id, amount=transaction_schema.amount
+    )
     if not account:
         abort(404, description="Account not found")
     return jsonify(schemas.AccountResponse.model_validate(account).model_dump())
+
 
 @app.route("/accounts/<int:account_id>/withdraw/", methods=["POST"])
 def withdraw_money(account_id):
@@ -198,21 +217,21 @@ def withdraw_money(account_id):
     db = next(get_db())
     transaction_data = request.json
     transaction_schema = schemas.Transaction(**transaction_data)
-    account = operations.withdraw(db, account_id=account_id, amount=transaction_schema.amount)
+    account = operations.withdraw(
+        db, account_id=account_id, amount=transaction_schema.amount
+    )
     if not account:
         abort(404, description="Account not found or insufficient balance")
     return jsonify(schemas.AccountResponse.model_validate(account).model_dump())
+
 
 definitions = {
     "AccountCreate": schemas.AccountCreate.model_json_schema(),
     "AccountResponse": schemas.AccountResponse.model_json_schema(),
     "Transaction": schemas.Transaction.model_json_schema(),
 }
-app.config['SWAGGER'] = {
-    'title': 'Bank API',
-    'uiversion': 3
-}
-swagger = Swagger(app, template={'definitions': definitions})
+app.config["SWAGGER"] = {"title": "Bank API", "uiversion": 3}
+swagger = Swagger(app, template={"definitions": definitions})
 
 if __name__ == "__main__":
     app.run(debug=True)

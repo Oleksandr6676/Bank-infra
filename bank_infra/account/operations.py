@@ -59,11 +59,11 @@ def transfer(db: Session, from_account_id: int, to_account_id: int, amount: floa
         db.refresh(from_account)
         db.refresh(to_account)
         return {
-            'from_account_id': from_account_id,
-            'to_account_id': to_account_id,
-            'amount': amount,
-            'from_account_balance': from_account.balance,
-            'to_account_balance': to_account.balance,
+            "from_account_id": from_account_id,
+            "to_account_id": to_account_id,
+            "amount": amount,
+            "from_account_balance": from_account.balance,
+            "to_account_balance": to_account.balance,
         }
     return None
 
