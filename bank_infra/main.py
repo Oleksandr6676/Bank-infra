@@ -7,6 +7,82 @@ app = Flask(__name__)
 
 models.Base.metadata.create_all(bind=engine)
 
+@app.route("/accounts/", methods=["GET"])
+def list_accounts():
+    """
+    List all accounts
+    ---
+    tags:
+      - Accounts
+    responses:
+      200:
+        description: A list of accounts
+        schema:
+          type: array
+          items:
+            $ref: '#/definitions/AccountResponse'
+    """
+    db = next(get_db())
+    accounts = operations.get_all_accounts(db=db)
+    return jsonify([schemas.AccountResponse.model_validate(account).model_dump() for account in accounts])
+
+
+@app.route("/accounts/transfer/", methods=["POST"])
+def transfer_money():
+    """
+    Transfer money between accounts
+    ---
+    tags:
+      - Accounts
+    parameters:
+      - in: body
+        name: body
+        description: Transfer details
+        schema:
+          $ref: '#/definitions/TransferRequest'
+    responses:
+      200:
+        description: Transfer completed successfully
+        schema:
+          $ref: '#/definitions/TransferResponse'
+      404:
+        description: One or both accounts not found or insufficient balance
+    """
+    db = next(get_db())
+    transfer_data = request.json
+    transfer_schema = schemas.TransferRequest(**transfer_data)
+    result = operations.transfer(db=db, from_account_id=transfer_schema.from_account_id, to_account_id=transfer_schema.to_account_id, amount=transfer_schema.amount)
+    if not result:
+        abort(404, description="Transfer failed: account(s) not found or insufficient balance")
+    return jsonify(schemas.TransferResponse.model_validate(result).model_dump())
+
+
+@app.route("/accounts/<int:account_id>", methods=["DELETE"])
+def delete_account(account_id):
+    """
+    Delete an account
+    ---
+    tags:
+      - Accounts
+    parameters:
+      - in: path
+        name: account_id
+        type: integer
+        required: true
+        description: The ID of the account
+    responses:
+      204:
+        description: Account deleted successfully
+      404:
+        description: Account not found
+    """
+    db = next(get_db())
+    account_deleted = operations.delete_account(db=db, account_id=account_id)
+    if not account_deleted:
+        abort(404, description="Account not found")
+    return '', 204
+
+
 @app.route("/accounts/", methods=["POST"])
 def create_account():
     """
