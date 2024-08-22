@@ -17,6 +17,7 @@ mysqlclient = "^2.2.4"
 flask = "^3.0.3"
 flasgger = "^0.9.7.1"
 pydantic = "^2.8.2"
+sqlalchemy = "^2.0.32"
 
 
 [build-system]
