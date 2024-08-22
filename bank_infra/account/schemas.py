@@ -17,3 +17,19 @@ class AccountResponse(BaseModel):
 
 class Transaction(BaseModel):
     amount: float
+
+
+class TransferRequest(BaseModel):
+    from_account_id: int
+    to_account_id: int
+    amount: float
+
+
+class TransferResponse(BaseModel):
+    from_account_id: int
+    to_account_id: int
+    amount: float
+    from_account_balance: float
+    to_account_balance: float
+
+    model_config = ConfigDict(from_attributes=True)
