@@ -1,7 +1,7 @@
 from behave import given, when, then
 import requests
 
-base_url = BASE_URL = "http://localhost:5000/"
+BASE_URL = "http://localhost:5000/"
 
 @given('Account is created and added to the database')
 def step_impl(context):
