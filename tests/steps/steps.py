@@ -9,7 +9,6 @@ BASE_URL = "http://localhost:5000/"
 def step_impl(context):
     response = create_account(initial_balance=2000, owner="Greg")
     json_data = response.json()
-    context.status_code = response.status_code
     context.id = json_data["id"]
     context.expected_balance = json_data["balance"]
 
