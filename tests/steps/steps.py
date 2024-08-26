@@ -1,6 +1,6 @@
 from behave import given, when, then
 import requests
-from tests.helpers.helpers import create_account
+from tests.helpers.helpers import create_account, get_account
 
 BASE_URL = "http://localhost:5000/"
 
@@ -16,8 +16,7 @@ def step_impl(context):
 
 @when('I call "{endpoint_name}" endpoint and store response')
 def step_impl(context, endpoint_name):
-    url = f"{BASE_URL}accounts/{context.id}"
-    response = requests.get(url)
+    response = get_account(context.id)
     json_data = response.json()
     context.status_code = response.status_code
     context.received_id = json_data["id"]
